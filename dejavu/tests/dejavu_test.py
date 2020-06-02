@@ -5,6 +5,7 @@ import random
 import re
 import subprocess
 import traceback
+import pprint
 from os import listdir, makedirs, walk
 from os.path import basename, exists, isfile, join, splitext
 
@@ -121,6 +122,8 @@ class DejavuTest:
             result = subprocess.check_output([
                 "python",
                 "dejavu.py",
+                '-c',
+                'dejavu.cnf',
                 '-r',
                 'file',
                 join(self.test_folder, f)])
@@ -133,49 +136,61 @@ class DejavuTest:
                 self.result_match_confidence[line][col] = 0
 
             else:
+                pprint.pprint("======RESULT======")
+                pprint.pprint(result)
                 result = result.strip()
+                #pprint.pprint(result)
                 # we parse the output song back to a json
                 result = json.loads(result.decode('utf-8').replace("'", '"').replace(': b"', ':"'))
 
                 # which song did we predict? We consider only the first match.
-                match = result[RESULTS][0]
-                song_result = match[SONG_NAME]
-                log_msg(f'song: {song}')
-                log_msg(f'song_result: {song_result}')
+                #pprint.pprint(RESULTS)
+                #pprint.pprint(result)
+                if len(result[RESULTS]) > 0:
+                    match = result[RESULTS][0]
+                    song_result = match[SONG_NAME]
+                    log_msg(f'song: {song}')
+                    log_msg(f'song_result: {song_result}')
 
-                if song_result != song:
-                    log_msg('invalid match')
-                    self.result_match[line][col] = 'invalid'
+                    if song_result != song:
+                        log_msg('invalid match')
+                        self.result_match[line][col] = 'invalid'
+                        self.result_matching_times[line][col] = 0
+                        self.result_query_duration[line][col] = 0
+                        self.result_match_confidence[line][col] = 0
+                    else:
+                        log_msg('correct match')
+                        print(self.result_match)
+                        self.result_match[line][col] = 'yes'
+                        self.result_query_duration[line][col] = round(result[TOTAL_TIME], 3)
+                        self.result_match_confidence[line][col] = match[HASHES_MATCHED]
+
+                        # using replace in f for getting rid of underscores in name
+                        song_start_time = re.findall("_[^_]+", f.replace(song, ""))
+                        song_start_time = song_start_time[0].lstrip("_ ")
+
+                        result_start_time = round((match[OFFSET] * DEFAULT_WINDOW_SIZE *
+                                                DEFAULT_OVERLAP_RATIO) / DEFAULT_FS, 0)
+
+                        self.result_matching_times[line][col] = int(result_start_time) - int(song_start_time)
+                        if abs(self.result_matching_times[line][col]) == 1:
+                            self.result_matching_times[line][col] = 0
+
+                        log_msg(f'query duration: {round(result[TOTAL_TIME], 3)}')
+                        log_msg(f'confidence: {match[HASHES_MATCHED]}')
+                        log_msg(f'song start_time: {song_start_time}')
+                        log_msg(f'result start time: {result_start_time}')
+
+                        if self.result_matching_times[line][col] == 0:
+                            log_msg('accurate match')
+                        else:
+                            log_msg('inaccurate match')
+                else:
+                    log_msg('No match')
+                    self.result_match[line][col] = 'no'
                     self.result_matching_times[line][col] = 0
                     self.result_query_duration[line][col] = 0
                     self.result_match_confidence[line][col] = 0
-                else:
-                    log_msg('correct match')
-                    print(self.result_match)
-                    self.result_match[line][col] = 'yes'
-                    self.result_query_duration[line][col] = round(result[TOTAL_TIME], 3)
-                    self.result_match_confidence[line][col] = match[HASHES_MATCHED]
-
-                    # using replace in f for getting rid of underscores in name
-                    song_start_time = re.findall("_[^_]+", f.replace(song, ""))
-                    song_start_time = song_start_time[0].lstrip("_ ")
-
-                    result_start_time = round((match[OFFSET] * DEFAULT_WINDOW_SIZE *
-                                               DEFAULT_OVERLAP_RATIO) / DEFAULT_FS, 0)
-
-                    self.result_matching_times[line][col] = int(result_start_time) - int(song_start_time)
-                    if abs(self.result_matching_times[line][col]) == 1:
-                        self.result_matching_times[line][col] = 0
-
-                    log_msg(f'query duration: {round(result[TOTAL_TIME], 3)}')
-                    log_msg(f'confidence: {match[HASHES_MATCHED]}')
-                    log_msg(f'song start_time: {song_start_time}')
-                    log_msg(f'result start time: {result_start_time}')
-
-                    if self.result_matching_times[line][col] == 0:
-                        log_msg('accurate match')
-                    else:
-                        log_msg('inaccurate match')
             log_msg('--------------------------------------------------\n')
 
 

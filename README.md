@@ -83,7 +83,7 @@ The following keys are mandatory:
 The following keys are optional:
 
 * `fingerprint_limit`: allows you to control how many seconds of each audio file to fingerprint. Leaving out this key, or alternatively using `-1` and `None` will cause Dejavu to fingerprint the entire audio file. Default value is `None`.
-* `database_type`: `mysql` (the default value) and `postgres` are supported. If you'd like to add another subclass for `BaseDatabase` and implement a new type of database, please fork and send a pull request!
+* `database_type`: `mysql` (the default value) `postgres` and `sqlite`  are supported. If you'd like to add another subclass for `BaseDatabase` and implement a new type of database, please fork and send a pull request!
 
 An example configuration is as follows:
 
@@ -297,3 +297,12 @@ wav | 1885
 fingerprints | 377
 
 There's a pretty direct trade-off between the necessary record time and the amount of storage needed. Adjusting the amplitude threshold for peaks and the fan value for fingerprinting will add more fingerprints and bolster the accuracy at the expense of more space. 
+
+
+
+---
+
+
+Integrated datawookies SQL support
+
+https://github.com/datawookie/dejavu

@@ -5,6 +5,7 @@ import traceback
 from itertools import groupby
 from time import time
 from typing import Dict, List, Tuple
+import pprint
 
 import dejavu.logic.decoder as decoder
 from dejavu.base_classes.base_database import get_database
@@ -18,9 +19,12 @@ from dejavu.config.settings import (DEFAULT_FS, DEFAULT_OVERLAP_RATIO,
 from dejavu.logic.fingerprint import fingerprint
 
 
+
 class Dejavu:
     def __init__(self, config):
         self.config = config
+
+        #pprint.pprint(self.config)
 
         # initialize db
         db_cls = get_database(config.get("database_type", "mysql").lower())
@@ -167,6 +171,13 @@ class Dejavu:
 
         """
         t = time()
+        # r = list(self.db.return_matches(hashes))
+        # pprint.pprint("==========================================================================")
+        # pprint.pprint("==========================================================================")
+        # pprint.pprint(r)
+        # pprint.pprint("==========================================================================")
+        # pprint.pprint("==========================================================================")
+        
         matches, dedup_hashes = self.db.return_matches(hashes)
         query_time = time() - t
 

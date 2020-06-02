@@ -1,5 +1,6 @@
 import abc
 from typing import Dict, List, Tuple
+import pprint
 
 from dejavu.base_classes.base_database import BaseDatabase
 
@@ -203,7 +204,7 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
             for index in range(0, len(values), batch_size):
                 # Create our IN part of the query
                 query = self.SELECT_MULTIPLE % ', '.join([self.IN_MATCH] * len(values[index: index + batch_size]))
-
+                #pprint.pprint(query)
                 cur.execute(query, values[index: index + batch_size])
 
                 for hsh, sid, offset in cur:

@@ -13,7 +13,7 @@ from dejavu.tests.dejavu_test import (DejavuTest, autolabeldoubles,
 
 
 def main(seconds: int, results_folder: str, temp_folder: str, log: bool, silent: bool,
-         log_file: str, padding: int, seed: int, src: str):
+         log_file: str, padding: int, seed: int, src: str, config: str):
 
     # set random seed if set by user
     set_seed(seed)
@@ -145,6 +145,8 @@ if __name__ == '__main__':
                                                  f'Usage: %(prog).py [options] TESTING_AUDIOFOLDER'
                                      )
 
+    parser.add_argument("-c", "--config", action="store", default="dejavu.cnf", type=str,
+                        help='Config filename')
     parser.add_argument("-sec", "--seconds", action="store", default=5, type=int,
                         help='Number of seconds starting from zero to test.')
     parser.add_argument("-res", "--results-folder", action="store", default="./dejavu_test_results",
@@ -163,4 +165,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args.seconds, args.results_folder, args.temp_folder, args.log, args.silent, args.log_file, args.padding,
-         args.seed, args.src)
+         args.seed, args.src, args.config)

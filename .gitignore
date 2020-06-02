@@ -1,3 +1,7 @@
+dejavu_venv
+results
+*.sqlite3
+
 *.pyc
 wav
 mp3
